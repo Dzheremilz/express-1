@@ -1,0 +1,11 @@
+{
+  "name": "express-1",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "Dzheremilz <trempejeremie@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "ethers": "^5.4.1",
+    "express": "^4.17.1"
+  }
+}

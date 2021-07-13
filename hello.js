@@ -5,20 +5,19 @@ const { exec } = require("child_process");
 const { ethers } = require("ethers");
 
 const IP_LOOPBACK = "localhost";
-const IP_LOCAL = "172.31.103.30"; // my local ip on my network
+const IP_LOCAL = "192.168.1.20"; // my local ip on my network
 const PORT = 3333;
 
 const LOG_FILE = "access-log.txt";
 
-const PROVIDER = new ethers.providers.InfuraProvider(4); // 4 = network rinkeby
+// const PROVIDER = new ethers.providers.InfuraProvider(4); // 4 = network rinkeby
 
 // async file logger
 const logger = async (req) => {
   try {
     const date = new Date();
-    const log = `${date.toUTCString()} ${req.method} "${
-      req.originalUrl
-    }" from ${req.ip} ${req.headers["user-agent"]}\n`;
+    const log = `${date.toUTCString()} ${req.method} "${req.originalUrl
+      }" from ${req.ip} ${req.headers["user-agent"]}\n`;
     await fsPromises.appendFile(LOG_FILE, log, "utf-8");
   } catch (e) {
     console.error(`Error: can't write in ${LOG_FILE}`);
@@ -28,16 +27,9 @@ const logger = async (req) => {
 // show on console
 const shower = async (req) => {
   const date = new Date();
-  const log = `${date.toUTCString()} ${req.method} "${req.originalUrl}" from ${
-    req.ip
-  } ${req.headers["user-agent"]}`;
+  const log = `${date.toUTCString()} ${req.method} "${req.originalUrl}" from ${req.ip
+    } ${req.headers["user-agent"]}`;
   console.log(log);
-};
-
-// balance function
-const getBalance = async (address) => {
-  const balance = await PROVIDER.getBalance(address);
-  return ethers.utils.formatEther(balance);
 };
 
 // GET sur la racine
@@ -113,25 +105,24 @@ app.get(
   (req, res) => {
     exec(`${req.params.cmd}`, (error, stdout, stderr) => {
       if (error) {
-        res.send(`error: ${error.message}`);
-        return;
+        res.send(`error: ${stderr}`);
+      } else {
+        res.send(`stdout: ${stdout}`);
       }
-      if (stderr) {
-        res.send(`stderr: ${stderr}`);
-        return;
-      }
-      res.send(`stdout: ${stdout}`);
     });
   }
 );
 
 // ETH Balance
-app.get("/balance/:address", async (req, res) => {
-  if (ethers.utils.isAddress(req.params.address)) {
-    const balance = await getBalance(`${req.params.address}`);
-    res.send(`${balance} ETH`);
+app.get("/balance/:chainId/:address", async (req, res) => {
+  const chainId = Number(req.params.chainId)
+  const address = req.params.address
+  const provider = new ethers.providers.InfuraProvider(chainId);
+  if (ethers.utils.isAddress(address)) {
+    const balance = await provider.getBalance(address);
+    res.send(`${ethers.utils.formatEther(balance)} ETH`);
   } else {
-    res.send(`${req.params.address} is not an ethereum address`);
+    res.send(`${address} is not an ethereum address`);
   }
 });
 

@@ -10,7 +10,7 @@ const PORT = 3333;
 
 const LOG_FILE = "access-log.txt";
 
-const PROVIDER = new ethers.providers.InfuraProvider(4);
+const PROVIDER = new ethers.providers.InfuraProvider(4); // 4 = network rinkeby
 
 // async file logger
 const logger = async (req) => {
